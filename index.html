@@ -20,6 +20,16 @@
             line-height: 1.5;
         }
 
+        /* [개선] 모든 모달 공통: 오픈 시 본문 화면이 제자리에서 고정되도록 설정 */
+        body.no-scroll {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
         /* 래퍼: 사방에 여유를 두어 화면에 꽉 차지 않는 컴팩트한 레이아웃 */
         .container {
             width: 100%;
@@ -239,6 +249,7 @@
             align-items: center;
             z-index: 1000;
             padding: 16px;
+            touch-action: none; /* 모바일 터치 시 본문 스크롤 전파 방지 */
         }
 
         .modal-content {
@@ -246,16 +257,17 @@
             max-width: 400px;
             background-color: #1a1a1a;
             border-radius: 12px;
-            max-height: 80vh; 
+            max-height: 85vh; 
             display: flex;
             flex-direction: column;
             position: relative;
             overflow: hidden;
             border: 1px solid #333;
+            touch-action: auto; /* 내부 스크롤 허용 */
         }
 
         .modal-header {
-            padding: 14px 16px;
+            padding: 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -279,6 +291,7 @@
             padding: 16px;
             overflow-y: auto; 
             flex: 1;
+            -webkit-overflow-scrolling: touch; /* 모바일 관성 스크롤 최적화 */
         }
 
         /* 회차 상세 모달용 레이아웃 */
@@ -329,7 +342,7 @@
 
         .comment-section-trigger {
             background: #2a2a2a;
-            padding: 10px;
+            padding: 12px;
             border-radius: 6px;
             text-align: center;
             font-size: 13px;
@@ -348,34 +361,36 @@
             line-height: 1.6;
         }
 
-        /* 댓글 박스 크기 고정 및 내부 스크롤 설정 (딱 댓글 3개 높이) */
+        /* 댓글 영역 레이아웃 - 쾌적한 가독성 확보 */
         .comment-list-container {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            max-height: 185px; 
+            gap: 14px; 
+            max-height: 260px; 
             overflow-y: auto; 
-            padding-right: 4px;
-            margin-bottom: 65px; 
+            padding: 4px 4px 80px 4px; 
+            -webkit-overflow-scrolling: touch;
         }
 
         .comment-item {
             background: #252525;
-            padding: 10px;
-            border-radius: 6px;
+            padding: 12px 14px; 
+            border-radius: 8px;
             font-size: 12px;
             flex-shrink: 0; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .comment-type-tag {
             font-size: 10px;
             color: #E50914;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             font-weight: bold;
         }
 
         .comment-text {
             color: #eee;
+            line-height: 1.4;
         }
 
         /* 댓글 작성 영역 하단 고정 */
@@ -385,29 +400,34 @@
             left: 0;
             width: 100%;
             background: #1a1a1a;
-            padding: 10px 12px;
+            padding: 14px 16px; 
             display: flex;
-            gap: 8px;
+            gap: 10px;
             border-top: 1px solid #2a2a2a;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.5);
         }
 
         .comment-input {
             flex: 1;
             background: #2a2a2a;
             border: 1px solid #333;
-            border-radius: 4px;
+            border-radius: 6px;
             color: white;
-            padding: 8px 12px;
-            font-size: 16px; /* 모바일 입력 시 브라우저 자동 확대 방지 */
+            padding: 10px 14px;
+            font-size: 14px; 
             outline: none;
+        }
+
+        .comment-input::placeholder {
+            color: #777;
         }
 
         .comment-submit-btn {
             background: #E50914;
             color: white;
             border: none;
-            padding: 0 14px;
-            border-radius: 4px;
+            padding: 0 16px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
             font-size: 14px;
@@ -503,10 +523,10 @@
 </div>
 
 <div id="detailModal" class="modal-overlay" onclick="closeModal(event, 'detailModal')">
-    <div class="modal-content">
+    <div class="modal-content" onclick="event.stopPropagation();">
         <div class="modal-header">
             <h3 id="modalTitle">회차 정보</h3>
-            <button class="modal-close" onclick="document.getElementById('detailModal').style.display='none'">×</button>
+            <button class="modal-close" onclick="closeModalDirect('detailModal')">×</button>
         </div>
         <div class="modal-body">
             <div class="detail-img-placeholder">[ 회차별 본문 이미지/작품 들어갈 자리 ]</div>
@@ -531,12 +551,12 @@
 </div>
 
 <div id="commentModal" class="modal-overlay" onclick="closeModal(event, 'commentModal')">
-    <div class="modal-content">
+    <div class="modal-content" onclick="event.stopPropagation();">
         <div class="modal-header">
             <h3 id="commentModalTitle">댓글 목록</h3>
-            <button class="modal-close" onclick="document.getElementById('commentModal').style.display='none'">×</button>
+            <button class="modal-close" onclick="closeModalDirect('commentModal')">×</button>
         </div>
-        <div class="modal-body" style="padding-bottom: 0;">
+        <div class="modal-body" style="padding: 0; position: relative; display: flex; flex-direction: column;">
             
             <div id="commentList" class="comment-list-container">
                 <div class="comment-item">
@@ -547,7 +567,7 @@
                     <div class="comment-type-tag">② [일반 댓글]</div>
                     <div class="comment-text">우치야는 도대체 어디로 간 걸까요? 연출 대박이네요.</div>
                 </div>
-                </div>
+            </div>
 
             <div class="comment-input-form">
                 <input type="text" id="commentInput" class="comment-input" placeholder="댓글을 입력해 주세요...">
@@ -559,28 +579,63 @@
 </div>
 
 <script>
-    // 현재 사용자가 선택하여 열어둔 회차의 ID를 기억하는 변수
     let currentEpisodeId = null;
+    let scrollPosition = 0;
+
+    // [핵심] 배경 스크롤 고정 및 위치 복원 함수
+    function setBodyScroll(isScrollable) {
+        if (!isScrollable) {
+            // 현재 스크롤 위치 저장 후 화면 고정 (아이폰 상단 튕김 및 스크롤 버블링 완벽 방지)
+            scrollPosition = window.pageYOffset;
+            document.body.style.top = `-${scrollPosition}px`;
+            document.body.classList.add('no-scroll');
+        } else {
+            // 고정 해제 및 기존 스크롤 위치로 원래대로 이동
+            document.body.classList.remove('no-scroll');
+            document.body.style.top = '';
+            window.scrollTo(0, scrollPosition);
+        }
+    }
 
     // 회차 클릭 시 상세 팝업 오픈
     function openDetailModal(id, title, desc) {
-        currentEpisodeId = id; // 회차 고유 ID 저장 (예: 1, 2, 3, 4)
+        currentEpisodeId = id; 
         document.getElementById('modalTitle').innerText = title;
         document.getElementById('modalDesc').innerText = desc;
         document.getElementById('detailModal').style.display = 'flex';
+        setBodyScroll(false); // 회차 모달 오픈 시 배경 잠금!
     }
 
-    // 댓글 모달 열기 (선택한 회차에 맞는 댓글만 리로드하여 표기)
+    // 댓글 모달 열기
     function openCommentModal() {
         document.getElementById('commentModalTitle').innerText = `${currentEpisodeId}화 댓글 목록`;
         loadCommentsForEpisode(currentEpisodeId);
         document.getElementById('commentModal').style.display = 'flex';
+        // 댓글 열릴 때도 잠금 유지
+        setBodyScroll(false); 
     }
 
-    // 배경 클릭 시 팝업 닫기
+    // 배경 어두운 영역 클릭 시 팝업 닫기
     function closeModal(event, id) {
         if (event.target === document.getElementById(id)) {
             document.getElementById(id).style.display = 'none';
+            checkAndReleaseScroll();
+        }
+    }
+
+    // X 버튼 등으로 직접 모달 창을 닫을 때
+    function closeModalDirect(id) {
+        document.getElementById(id).style.display = 'none';
+        checkAndReleaseScroll();
+    }
+
+    // 활성화된 모달이 아무것도 없을 때만 배경 잠금을 해제하는 검증 함수
+    function checkAndReleaseScroll() {
+        const detailVisible = document.getElementById('detailModal').style.display === 'flex';
+        const commentVisible = document.getElementById('commentModal').style.display === 'flex';
+        
+        if (!detailVisible && !commentVisible) {
+            setBodyScroll(true);
         }
     }
 
@@ -600,7 +655,7 @@
         }
     }
 
-    // 💾 특정 회차 고유 키를 활용해 개별 댓글 저장
+    // 특정 회차 고유 키를 활용해 개별 댓글 저장
     function addComment() {
         const input = document.getElementById('commentInput');
         const text = input.value.trim();
@@ -610,20 +665,14 @@
             return;
         }
 
-        // 회차별 고유한 로컬스토리지 키 생성 (예: 'episode_1_comments')
         const storageKey = `episode_${currentEpisodeId}_comments`;
-        
         let savedComments = JSON.parse(localStorage.getItem(storageKey)) || [];
         savedComments.push(text);
-        
         localStorage.setItem(storageKey, JSON.stringify(savedComments));
 
-        // 화면에 댓글 그리기
         renderComment(text);
-        
         input.value = '';
         
-        // 추가 시 박스 내부만 가장 아래쪽으로 부드럽게 스크롤 이동
         const commentList = document.getElementById('commentList');
         commentList.scrollTop = commentList.scrollHeight;
     }
@@ -640,11 +689,10 @@
         commentList.appendChild(newComment);
     }
 
-    // 🔄 선택된 회차의 댓글만 선별하여 로드하는 함수
+    // 선택된 회차의 댓글만 선별하여 로드하는 함수
     function loadCommentsForEpisode(episodeId) {
         const commentList = document.getElementById('commentList');
         
-        // 기존에 누적되어 그려졌던 이전 회차 방문자 댓글 요소들을 초기화하고 기본 시스템 기본댓글 2개만 남김
         commentList.innerHTML = `
             <div class="comment-item">
                 <div class="comment-type-tag">① [시스템 추천/랜덤]</div>
@@ -656,14 +704,12 @@
             </div>
         `;
 
-        // 해당 회차의 데이터만 LocalStorage에서 추출하여 화면에 바인딩
         const storageKey = `episode_${episodeId}_comments`;
         let savedComments = JSON.parse(localStorage.getItem(storageKey)) || [];
         savedComments.forEach(function(text) {
             renderComment(text);
         });
 
-        // 댓글 로드 완료 시 스크롤을 맨 위로 초기화
         commentList.scrollTop = 0;
     }
 
